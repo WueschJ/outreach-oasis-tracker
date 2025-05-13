@@ -35,7 +35,7 @@ const ContactForm: React.FC = () => {
       setNotes('');
       
       toast({
-        title: "Contact saved",
+        title: "News saved",
         description: `Notes for ${name} have been saved successfully.`,
       });
     }
@@ -44,8 +44,8 @@ const ContactForm: React.FC = () => {
   const deleteContact = (id: string) => {
     setContacts(contacts.filter(contact => contact.id !== id));
     toast({
-      title: "Contact deleted",
-      description: "Contact notes have been removed.",
+      title: "News deleted",
+      description: "News item has been removed.",
     });
   };
   
@@ -53,7 +53,7 @@ const ContactForm: React.FC = () => {
     <div className="space-y-6">
       <Card className="shadow-md">
         <CardHeader>
-          <CardTitle>Contact Notes</CardTitle>
+          <CardTitle>News</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -82,7 +82,7 @@ const ContactForm: React.FC = () => {
                 required
               />
             </div>
-            <Button type="submit" className="w-full">Save Contact Notes</Button>
+            <Button type="submit" className="w-full">Save News</Button>
           </form>
         </CardContent>
       </Card>
@@ -90,7 +90,7 @@ const ContactForm: React.FC = () => {
       {contacts.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Recent Contact Notes</CardTitle>
+            <CardTitle>Recent News</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
