@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import { Strikethrough } from 'lucide-react';
 
 interface TeamMember {
   id: string;
@@ -17,6 +18,7 @@ interface Task {
   id: string;
   title: string;
   description?: string;
+  completed: boolean;
 }
 
 interface KanbanBoardProps {
@@ -25,10 +27,35 @@ interface KanbanBoardProps {
 
 const KanbanBoard: React.FC<KanbanBoardProps> = ({ 
   initialMembers = [
-    { id: '1', name: 'Alice Johnson', tasks: [{ id: '1', title: 'Contact new leads' }, { id: '2', title: 'Follow-up emails' }] },
-    { id: '2', name: 'Bob Smith', tasks: [{ id: '3', title: 'Create pitch deck' }] },
-    { id: '3', name: 'Charlie Brown', tasks: [{ id: '4', title: 'Research competitors' }] },
-    { id: '4', name: 'Diana Miller', tasks: [{ id: '5', title: 'Client meeting prep' }] },
+    { 
+      id: '1', 
+      name: 'Alice Johnson', 
+      tasks: [
+        { id: '1', title: 'Contact new leads', completed: false }, 
+        { id: '2', title: 'Follow-up emails', completed: false }
+      ] 
+    },
+    { 
+      id: '2', 
+      name: 'Bob Smith', 
+      tasks: [
+        { id: '3', title: 'Create pitch deck', completed: false }
+      ] 
+    },
+    { 
+      id: '3', 
+      name: 'Charlie Brown', 
+      tasks: [
+        { id: '4', title: 'Research competitors', completed: false }
+      ] 
+    },
+    { 
+      id: '4', 
+      name: 'Diana Miller', 
+      tasks: [
+        { id: '5', title: 'Client meeting prep', completed: false }
+      ] 
+    },
   ]
 }) => {
   const [members, setMembers] = useState<TeamMember[]>(initialMembers);
@@ -47,7 +74,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
             ...member,
             tasks: [
               ...member.tasks,
-              { id: Date.now().toString(), title: newTaskTitle.trim() }
+              { id: Date.now().toString(), title: newTaskTitle.trim(), completed: false }
             ]
           };
         }
@@ -85,12 +112,20 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
     setIsMemberDialogOpen(true);
   };
   
-  const removeTask = (memberId: string, taskId: string) => {
+  const toggleTaskCompletion = (memberId: string, taskId: string) => {
     const updatedMembers = members.map(member => {
       if (member.id === memberId) {
         return {
           ...member,
-          tasks: member.tasks.filter(task => task.id !== taskId)
+          tasks: member.tasks.map(task => {
+            if (task.id === taskId) {
+              return {
+                ...task,
+                completed: !task.completed
+              };
+            }
+            return task;
+          })
         };
       }
       return member;
@@ -136,17 +171,23 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
             {member.tasks.length > 0 ? (
               <div className="space-y-3">
                 {member.tasks.map(task => (
-                  <Card key={task.id} className={cn("kanban-card")}>
+                  <Card 
+                    key={task.id} 
+                    className={cn(
+                      "kanban-card cursor-pointer transition-all",
+                      task.completed && "bg-gray-100"
+                    )}
+                    onClick={() => toggleTaskCompletion(member.id, task.id)}
+                  >
                     <CardContent className="p-3 flex justify-between items-center">
-                      <span>{task.title}</span>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-6 w-6 p-0 text-gray-400 hover:text-red-500"
-                        onClick={() => removeTask(member.id, task.id)}
-                      >
-                        ×
-                      </Button>
+                      <span className={cn(
+                        task.completed && "text-gray-400 line-through"
+                      )}>
+                        {task.title}
+                      </span>
+                      {task.completed && (
+                        <Strikethrough className="h-4 w-4 text-gray-400" />
+                      )}
                     </CardContent>
                   </Card>
                 ))}
