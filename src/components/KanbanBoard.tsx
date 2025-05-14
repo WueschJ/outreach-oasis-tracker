@@ -60,16 +60,16 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
 }) => {
   const [members, setMembers] = useState<TeamMember[]>(initialMembers);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
-  const [newTaskMemberId, setNewTaskMemberId] = useState('');
+  const [currentMemberId, setCurrentMemberId] = useState<string | null>(null);
   const [editMemberName, setEditMemberName] = useState('');
   const [isMemberDialogOpen, setIsMemberDialogOpen] = useState(false);
+  const [isTaskDialogOpen, setIsTaskDialogOpen] = useState(false);
   
   const handleAddTask = () => {
-    if (newTaskTitle.trim() && newTaskMemberId) {
+    if (newTaskTitle.trim() && currentMemberId) {
       const updatedMembers = members.map(member => {
-        if (member.id === newTaskMemberId) {
+        if (member.id === currentMemberId) {
           return {
             ...member,
             tasks: [
@@ -83,8 +83,14 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
       
       setMembers(updatedMembers);
       setNewTaskTitle('');
-      setIsDialogOpen(false);
+      setIsTaskDialogOpen(false);
     }
+  };
+  
+  const openAddTaskDialog = (memberId: string) => {
+    setCurrentMemberId(memberId);
+    setNewTaskTitle('');
+    setIsTaskDialogOpen(true);
   };
   
   const handleEditMember = () => {
@@ -139,8 +145,8 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-bold">Team Tasks</h2>
         <Button onClick={() => {
-          setNewTaskMemberId(members[0]?.id || '');
-          setIsDialogOpen(true);
+          setCurrentMemberId(members[0]?.id || '');
+          setIsTaskDialogOpen(true);
         }}>
           Add Task
         </Button>
@@ -159,10 +165,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
               <Button 
                 variant="ghost" 
                 size="sm"
-                onClick={() => {
-                  setNewTaskMemberId(member.id);
-                  setIsDialogOpen(true);
-                }}
+                onClick={() => openAddTaskDialog(member.id)}
               >
                 +
               </Button>
@@ -201,27 +204,16 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
         ))}
       </div>
       
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isTaskDialogOpen} onOpenChange={setIsTaskDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Add New Task</DialogTitle>
+            <DialogTitle>
+              {members.find(m => m.id === currentMemberId)?.name 
+                ? `Add Task for ${members.find(m => m.id === currentMemberId)?.name}` 
+                : 'Add New Task'}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="member">Team Member</Label>
-              <select
-                id="member"
-                className="w-full p-2 border rounded"
-                value={newTaskMemberId}
-                onChange={(e) => setNewTaskMemberId(e.target.value)}
-              >
-                {members.map(member => (
-                  <option key={member.id} value={member.id}>
-                    {member.name}
-                  </option>
-                ))}
-              </select>
-            </div>
             <div className="space-y-2">
               <Label htmlFor="task">Task Title</Label>
               <Input
@@ -233,7 +225,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancel</Button>
+            <Button variant="outline" onClick={() => setIsTaskDialogOpen(false)}>Cancel</Button>
             <Button onClick={handleAddTask}>Add Task</Button>
           </DialogFooter>
         </DialogContent>
